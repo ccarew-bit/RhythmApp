@@ -94,10 +94,28 @@ namespace RhythmApp
             Console.WriteLine("band not shreddin' at the moment.");
           }
         }
+        else if (input == "resign")
+        {
+          Console.WriteLine("Which Band would you like to sign?");
+          var band = Console.ReadLine();
+
+          var bandToResign = db.Bands.FirstOrDefault(b => b.Name == band);
+
+          if (bandToResign != null)
+          {
+            bandToResign.IsSigned = true;
+            Console.WriteLine($"you have resigned {band}");
+            db.Bands.Update(bandToResign);
+            db.SaveChanges();
+          }
+          else
+          {
+            Console.WriteLine("band not shreddin' at the moment.");
+          }
+        }
         else if (input == "produce")
         {
           Console.WriteLine("Which band is making an album?");
-
         }
       }
       PopulateDatabase();
