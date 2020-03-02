@@ -51,12 +51,13 @@ namespace RhythmApp
           db.SaveChanges();
         }
         var newBand = new Band();
+        var newAlbum = new Album();
         Console.WriteLine("would you like to (sign) a band, (produce) an album, let a band (go), (resign) a band or (view) a band?");
         var input = Console.ReadLine().ToLower();
 
         if (input == "sign")
         {
-          Console.WriteLine($"What would you like to call your band?");
+          Console.WriteLine($"What would you like to call your Band?");
           newBand.Name = Console.ReadLine();
           Console.WriteLine($"Where is your band from?");
           newBand.CountryOfOrigin = Console.ReadLine();
@@ -74,6 +75,7 @@ namespace RhythmApp
           newBand.ContactPhoneNumber = Console.ReadLine();
           db.Bands.Add(newBand);
           db.SaveChanges();
+          Console.WriteLine("would you like to view by ");
         }
         else if (input == "go")
         {
@@ -113,9 +115,111 @@ namespace RhythmApp
             Console.WriteLine("band not shreddin' at the moment.");
           }
         }
+        else if (input == "view")
+        {
+          Console.WriteLine("Which would you like to view? bands that are (signed), bands that are (not signed), a bands (albums), (songs) on an album or album by (release)?");
+          var view = Console.ReadLine().ToLower();
+          if (view == "signed")
+          {
+            var signedBands = db.Bands.Where(b => b.IsSigned == true);
+            foreach (var signed in signedBands)
+            {
+              Console.WriteLine($"{signed.Name} is signed");
+            }
+          }
+          else if (view == "not signed")
+          {
+            var notSignedBands = db.Bands.Where(b => b.IsSigned == false);
+            foreach (var notSigned in notSignedBands)
+            {
+              Console.WriteLine($"{notSigned.Name} is not signed");
+            }
+          }
+          else if (view == "albums")
+          {
+            Console.WriteLine($"what band would you like to view albums from?");
+            var bands = db.Bands.OrderBy(b => b.Name);
+            foreach (var band in bands)
+            {
+              Console.WriteLine($"{band.Id} : {band.Name}");
+
+            }
+            var bandId = int.Parse(Console.ReadLine());
+            var albums = db.Albums.Where(a => bandId == a.BandId);
+            foreach (var album in albums)
+            {
+              Console.WriteLine($"{album.Title}");
+            }
+
+          }
+          else if (view == "songs")
+          {
+            Console.WriteLine($"what album would you like to view songs from?");
+            var albums = db.Albums.OrderBy(b => b.Title);
+            foreach (var album in albums)
+            {
+              Console.WriteLine($"{album.Id} : {album.Title}");
+            }
+            var albumId = int.Parse(Console.ReadLine());
+            var songs = db.Songs.Where(a => albumId == a.AlbumId);
+            foreach (var song in songs)
+            {
+              Console.WriteLine($"{song.Title}");
+            }
+          }
+          else if (view == "release")
+          {
+            var orderedAlbums = db.Albums.OrderBy(a => a.ReleaseDate);
+            foreach (var order in orderedAlbums)
+            {
+              Console.WriteLine($"{order.Title} was releases {order.ReleaseDate} ");
+
+            }
+          }
+        }
         else if (input == "produce")
         {
-          Console.WriteLine("Which band is making an album?");
+          Console.WriteLine("would you like to (create) a new album or (add) a song to an album?");
+          var addOrCreate = Console.ReadLine().ToLower();
+          if (addOrCreate == "create")
+          {
+            Console.WriteLine($"What would you like to call your Album?");
+            newAlbum.Title = Console.ReadLine();
+            Console.WriteLine($"Is this Album Explicit? type (true) for yes and (false) for no.");
+            newAlbum.IsExplicit = bool.Parse(Console.ReadLine());
+            Console.WriteLine($"these are the bands that are signed.");
+            var band = db.Bands.OrderBy(b => b.Id);
+            var signedBands = db.Bands.Where(b => b.IsSigned == true);
+            foreach (var signed in signedBands)
+            {
+              Console.WriteLine($"{signed.Id} : {signed.Name} is signed");
+            }
+            Console.WriteLine("which band is making this album? ");
+            newAlbum.BandId = int.Parse(Console.ReadLine());
+            newAlbum.ReleaseDate = DateTime.Now;
+            db.Albums.Add(newAlbum);
+            db.SaveChanges();
+          }
+          else if (addOrCreate == "add")
+          {
+            var newSong = new Song();
+            var albumToView = db.Albums.OrderBy(a => a.Title);
+            foreach (var album in albumToView)
+            {
+              Console.WriteLine($"{album.Title}:{album.Id}");
+            }
+            Console.WriteLine("which album would you like to add a song to?");
+            newSong.AlbumId = int.Parse(Console.ReadLine());
+            Console.WriteLine($"what are the lyrics in your song?");
+            newSong.Lyrics = Console.ReadLine();
+            Console.WriteLine($"how long is this song?");
+            newSong.Length = Console.ReadLine();
+            Console.WriteLine($"what Genre is this song?");
+            newSong.Genre = Console.ReadLine();
+            db.Songs.Add(newSong);
+            db.SaveChanges();
+
+          }
         }
       }
       PopulateDatabase();
